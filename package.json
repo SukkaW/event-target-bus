@@ -1,7 +1,7 @@
 {
   "name": "event-target-bus",
   "version": "1.0.0",
-  "description": "",
+  "description": "Centralizes `EventTarget` subscriptions for creating shared subscription stores.",
   "repository": {
     "type": "git",
     "url": "https://github.com/SukkaW/event-target-bus.git"
