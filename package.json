@@ -19,7 +19,8 @@
   },
   "scripts": {
     "lint": "eslint --format=sukka .",
-    "build": "bunchee --minify --no-sourcemap"
+    "build": "bunchee --minify --no-sourcemap",
+    "test": "SWC_NODE_IGNORE_DYNAMIC=1 SWC_NODE_INLINE_SOURCE_MAP=1 nyc mocha --require @swc-node/register test/**/*.test.ts"
   },
   "keywords": [
     "EventTarget",
@@ -29,14 +30,19 @@
   "author": "SukkaW <https://skk.moe>",
   "license": "MIT",
   "devDependencies": {
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@swc-node/register": "^1.11.1",
     "@swc/core": "^1.15.17",
     "@types/mocha": "^10.0.10",
+    "@types/sinon": "^21.0.0",
     "bunchee": "^6.9.4",
     "earl": "^2.0.0",
     "eslint": "^10.0.2",
     "eslint-config-sukka": "^8.7.0",
     "eslint-formatter-sukka": "^8.7.0",
     "mocha": "^11.7.5",
+    "nyc": "^18.0.0",
+    "sinon": "^21.0.1",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.30.3"
