@@ -34,11 +34,15 @@ export type EventMapFor<T extends SupportedEventTarget> = |
   : Record<never, never>;
 /* eslint-enable @stylistic/indent */
 
+interface CleanupFunction {
+  (): void
+}
+
 export type EventTargetListener<E = Event> = (event: E) => void;
 
 export interface EventTargetBus<T extends SupportedEventTarget, K extends keyof EventMapFor<T>> {
   /** subscribe */
-  on(callback: EventTargetListener<EventMapFor<T>[K]>): VoidFunction,
+  on(callback: EventTargetListener<EventMapFor<T>[K]>): CleanupFunction,
   /** unsubscribe */
   off(callback: EventTargetListener<EventMapFor<T>[K]>): void
 }
