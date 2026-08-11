@@ -24,7 +24,7 @@ export function createSyncExternalStoreSubscribe<
   eventName: K | K[]
 ): SyncExternalStoreSubscribe {
   // eslint-disable-next-line sukka/prefer-foxts-cast-array -- avoid a dependency for this small adapter
-  const eventNames = [...new Set(Array.isArray(eventName) ? eventName : [eventName])];
+  const eventNames = Array.from(new Set(Array.isArray(eventName) ? eventName : [eventName]));
   let buses: Array<EventTargetBus<T, K>> | null = null;
 
   return (onStoreChange) => {
