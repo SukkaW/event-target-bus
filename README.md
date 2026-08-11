@@ -64,38 +64,53 @@ mqlBus.on((evt) => {});
 // implemented with `event-target-bus` for better performance when there are many subscribers
 // https://react.dev/reference/react/useSyncExternalStore#subscribing-to-a-browser-api
 
-import { createEventTargetBus } from 'event-target-bus';
-import type { EventTargetBus } from 'event-target-bus';
+import { useSyncExternalStore } from 'react';
+import { createSyncExternalStoreSubscribe } from 'event-target-bus/react';
 
-let onlineBus: EventTargetBus<Window, 'online'> | null = null;
-let offlineBus: EventTargetBus<Window, 'offline'> | null = null;
-
-function subscribe(callback) {
-  if (typeof window === 'undefined') {
-    // In SSR, we can return a no-op unsubscribe function
-    return () => {};
-  }
-
-  onlineBus ??= createEventTargetBus(window, 'online');
-  offlineBus ??= createEventTargetBus(window, 'offline');
-
-  const unsubOnline = onlineBus.on(callback);
-  const unsubOffline = offlineBus.on(callback);
-
-  return () => {
-    unsubOnline();
-    unsubOffline();
-  };
-}
+// Define this at module scope so every hook instance shares the same subscribe function
+// and event target buses. event target (`window` in this case) is only read on the first
+// client subscription, so evaluating this module during SSR is safe.
+const subscribe = createSyncExternalStoreSubscribe(
+  () => window,
+  ['online', 'offline']
+);
 
 function getSnapshot() {
   return navigator.onLine;
 }
 
 function useOnline() {
-  return useSyncExternalStore(subscribe, getSnapshot);
+  return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 ```
+
+The helper only adapts event subscriptions. Snapshot caching and the server
+snapshot value remain the responsibility of the hook using it.
+
+For dynamic targets, use the keyed variant. It returns the same subscribe
+function for the same key and lazily creates one target and bus per key:
+
+```ts
+import { useSyncExternalStore } from 'react';
+import { createKeyedSyncExternalStoreSubscribe } from 'event-target-bus/react';
+
+const getMediaQuerySubscribe = createKeyedSyncExternalStoreSubscribe(
+  (query: string) => window.matchMedia(query),
+  'change'
+);
+
+function useMediaQuery(query: string, serverValue: boolean) {
+  return useSyncExternalStore(
+    getMediaQuerySubscribe(query),
+    () => window.matchMedia(query).matches,
+    () => serverValue
+  );
+}
+```
+
+The keyed factory retains subscribe functions by key for its lifetime. Define
+it at module scope and use it with a bounded set of keys, such as
+application-defined media queries.
 
 ----
 
